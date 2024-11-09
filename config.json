@@ -1,0 +1,37 @@
+{
+    "exchange_api": [
+        {
+            "exchange": "coinex",
+            "api_key": "",
+            "api_secret": ""
+        },
+        {
+            "exchange": "binance",
+            "api_key": "",
+            "api_secret": ""
+        }
+    ],
+    "database": {
+        "host": "localhost",
+        "user": "root",
+        "password": "123456",
+        "database": "exchanges",
+        "charset": "utf8mb4"
+    },
+    "schedule": {
+        "interval_seconds": 5
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d:%(funcName)s] - %(message)s",
+        "file": {
+            "enabled": true,
+            "path": "logs/tracker.log",
+            "max_bytes": 10485760,
+            "backup_count": 5
+        },
+        "console": {
+            "enabled": true
+        }
+    }
+}

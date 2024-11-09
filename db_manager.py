@@ -1,8 +1,8 @@
-import logging
 from mysql.connector import pooling
 from typing import Dict, List
+from log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 class DatabaseManager:
     """数据库管理类"""

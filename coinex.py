@@ -2,8 +2,8 @@ import hashlib
 import json
 import time
 import hmac
-from urllib.parse import urlparse, urlencode
-from typing import Dict, Optional, List, Tuple, Union, Any
+from urllib.parse import urlencode
+from typing import Dict, Optional
 import requests
 
 

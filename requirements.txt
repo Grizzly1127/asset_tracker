@@ -7,3 +7,6 @@ binance-futures-connector
 
 # mysql
 mysql-connector-python
+
+# daemon
+python-daemon==3.1.0

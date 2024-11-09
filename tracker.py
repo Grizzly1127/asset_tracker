@@ -1,4 +1,3 @@
-import logging
 import time
 from decimal import Decimal
 from binance.client import Client as BinanceClient
@@ -11,8 +10,9 @@ from typing import Dict, List, Callable
 from abc import ABC, abstractmethod
 from datetime import datetime
 from threading import Lock
+from log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 class BaseTracker(ABC):
     ACCOUNT_TYPE_SPOT = "spot"

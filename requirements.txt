@@ -1,0 +1,9 @@
+# Logging (如果使用额外的日志处理库)
+python-json-logger==2.0.7
+
+# Binance
+binance-connector
+binance-futures-connector
+
+# mysql
+mysql-connector-python

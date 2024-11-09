@@ -1,5 +1,4 @@
 import logging
-import mysql.connector
 from mysql.connector import pooling
 from typing import Dict, List
 
@@ -15,7 +14,7 @@ class DatabaseManager:
     def _create_pool(self):
         """创建数据库连接池"""
         try:
-            self.pool = mysql.connector.pooling.MySQLConnectionPool(
+            self.pool = pooling.MySQLConnectionPool(
                 pool_name="mypool",
                 pool_size=5,
                 **self.config

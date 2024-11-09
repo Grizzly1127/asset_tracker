@@ -3,7 +3,6 @@ import logging
 import os
 import json
 from logging.handlers import RotatingFileHandler
-from threading import Thread, Event
 from typing import Dict
 from tracker import Tracker
 
@@ -12,7 +11,7 @@ logger = None
 class Config:
     """配置加载类"""
     @staticmethod
-    def load_config(file_path: str = 'config.json') -> Dict:
+    def load_config(file_path: str = 'test_config.json') -> Dict:
         try:
             with open(file_path, 'r') as f:
                 return json.load(f)

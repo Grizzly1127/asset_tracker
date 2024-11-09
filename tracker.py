@@ -10,7 +10,6 @@ from threading import Thread, Event
 from typing import Dict, List, Callable
 from abc import ABC, abstractmethod
 from datetime import datetime
-from collections import UserDict
 from threading import Lock
 
 logger = logging.getLogger(__name__)
@@ -191,48 +190,6 @@ class CoinexTracker(BaseTracker):
         except CoinexAPIException as e:
             logger.error(f"获取交易对最新价格失败: {e}")
             return {}
-    
-
-class ThreadSafeDict(UserDict):
-    def __init__(self):
-        super().__init__()
-        self._lock = Lock()
-        
-    def __getitem__(self, key):
-        with self._lock:
-            return super().__getitem__(key)
-            
-    def __setitem__(self, key, value):
-        with self._lock:
-            super().__setitem__(key, value)
-    
-    def __delitem__(self, key):
-        with self._lock:
-            super().__delitem__(key)
-            
-    def update(self, *args, **kwargs):
-        with self._lock:
-            super().update(*args, **kwargs)
-    
-    def get(self, key, default=None):
-        with self._lock:
-            return super().get(key, default)
-    
-    def clear(self):
-        with self._lock:
-            super().clear()
-
-    def items(self):
-        with self._lock:
-            return super().items()
-
-    def keys(self):
-        with self._lock:
-            return super().keys()
-
-    def values(self):
-        with self._lock:
-            return super().values()
 
 class Tracker:
     def __init__(self, exchange_config: List[Dict], db_config: Dict, interval: int):

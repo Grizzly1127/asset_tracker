@@ -272,7 +272,7 @@ class Tracker:
                 total_usdt_sum += total_usdt
                 
                 values.append((
-                    str(self.user_id),
+                    self.user_id,
                     current_time,
                     balance['coin'],
                     balance['exchange'],

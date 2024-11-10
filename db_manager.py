@@ -51,7 +51,7 @@ class DatabaseManager:
         create_table_sql = """
         CREATE TABLE IF NOT EXISTS assets_history (
             id BIGINT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(50) NOT NULL,
+            user_id BIGINT NOT NULL,
             created_at DATETIME NOT NULL,
             coin VARCHAR(20) NOT NULL,
             exchange VARCHAR(50) NOT NULL,

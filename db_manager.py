@@ -78,7 +78,7 @@ class DatabaseManager:
         create_table_sql = """
         CREATE TABLE IF NOT EXISTS total_assets_history (
             id BIGINT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(50) NOT NULL,
+            user_id BIGINT NOT NULL,
             created_at DATETIME NOT NULL,
             total_usdt DECIMAL(30,8) NOT NULL,
             

@@ -302,7 +302,7 @@ class Tracker:
                 ) VALUES (%s, %s, %s)
             """
             self.db_manager.execute(total_assets_sql, (
-                str(self.user_id),
+                self.user_id,
                 current_time,
                 str(total_usdt_sum)
             ))

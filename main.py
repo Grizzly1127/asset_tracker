@@ -29,7 +29,7 @@ def run_tracker():
     try:
         # 创建并启动追踪管理器
         global manager
-        manager = Tracker(config["exchange_api"], config["database"], config["schedule"]["interval_seconds"])
+        manager = Tracker(config["exchange_api"], config["database"], config["db_connector"], config["schedule"]["interval_seconds"])
         manager.start()
                 
     except Exception as e:

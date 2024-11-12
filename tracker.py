@@ -204,11 +204,11 @@ class CoinexTracker(BaseTracker):
             return {}
 
 class Tracker:
-    def __init__(self, exchange_config: List[Dict], db_config: Dict, interval: int):
+    def __init__(self, exchange_config: List[Dict], db_config: Dict, connector: str, interval: int):
         self.stop_event = Event()
         self.interval = interval
         self.exchange_config = exchange_config
-        self.db_connector = db_config.get('db_connector', 'sqlite')
+        self.db_connector = connector
         self.db_config = db_config
         self.user_id = 1
         self.tickers_lock = Lock()
@@ -217,7 +217,7 @@ class Tracker:
         self.threads: Dict[str, Thread] = {}
 
         self._init_db_manager()
-        self._init_trackers(exchange_config)
+        self._init_trackers()
         self._init_tickers()
     
     def _init_db_manager(self):
@@ -228,9 +228,9 @@ class Tracker:
         else:
             self.db_manager = SQLiteDbManager(self.db_config)
 
-    def _init_trackers(self, config: List[Dict]):
+    def _init_trackers(self):
         """初始化追踪器"""
-        [self._add_tracker(item["exchange"].lower(), item["api_key"], item["api_secret"]) for item in config]
+        [self._add_tracker(item["exchange"].lower(), item["api_key"], item["api_secret"]) for item in self.exchange_config]
 
     def _init_tickers(self):
         """初始化交易对价格"""

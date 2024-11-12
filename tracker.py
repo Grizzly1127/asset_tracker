@@ -208,6 +208,7 @@ class Tracker:
         self.stop_event = Event()
         self.interval = interval
         self.exchange_config = exchange_config
+        self.db_connector = db_config.get('db_connector', 'sqlite')
         self.db_config = db_config
         self.user_id = 1
         self.tickers_lock = Lock()
@@ -222,7 +223,7 @@ class Tracker:
     def _init_db_manager(self):
         """初始化数据库管理器"""
         # mysql or sqlite
-        if self.db_config.get('connector') == 'mysql':
+        if self.db_connector == 'mysql':
             self.db_manager = MysqlDbManager(self.db_config)
         else:
             self.db_manager = SQLiteDbManager(self.db_config)
@@ -312,7 +313,7 @@ class Tracker:
                     free, locked, total, price_usdt, total_usdt
                 ) VALUES 
             """
-            if self.db_config.get('connector') == 'mysql':
+            if self.db_connector == 'mysql':
                 sql += "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
             else:
                 sql += "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -326,7 +327,7 @@ class Tracker:
                     user_id, created_at, total_usdt, detail
                 ) VALUES 
             """
-            if self.db_config.get('connector') == 'mysql':
+            if self.db_connector == 'mysql':
                 sql += "(%s, %s, %s, %s)"
             else:
                 sql += "(?, ?, ?, ?)"

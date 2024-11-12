@@ -12,8 +12,8 @@
             "api_secret": ""
         }
     ],
+    "db_connector": "mysql",
     "database": {
-        "connector": "mysql",
         "host": "localhost",
         "user": "root",
         "password": "123456",

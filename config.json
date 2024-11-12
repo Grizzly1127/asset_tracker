@@ -13,6 +13,7 @@
         }
     ],
     "database": {
+        "connector": "mysql",
         "host": "localhost",
         "user": "root",
         "password": "123456",
@@ -20,7 +21,7 @@
         "charset": "utf8mb4"
     },
     "schedule": {
-        "interval_seconds": 5
+        "interval_seconds": 60
     },
     "logging": {
         "format": "%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d:%(funcName)s] - %(message)s",

@@ -1,10 +1,11 @@
 import time
+import json
 from decimal import Decimal
 from binance.client import Client as BinanceClient
 from binance.cm_futures import CMFutures as BinanceFuturesClient
 from binance.exceptions import BinanceAPIException
 from coinex import Client as CoinexClient, CoinexAPIException
-from db_manager import DatabaseManager
+from db_manager import MysqlDbManager, SQLiteDbManager
 from threading import Thread, Event
 from typing import Dict, List, Callable
 from abc import ABC, abstractmethod
@@ -13,6 +14,13 @@ from threading import Lock
 from log import get_logger
 
 logger = get_logger()
+
+# 自定义 JSON 编码器
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return str(obj)  # 将 Decimal 转换为字符串
+        return super().default(obj)
 
 class BaseTracker(ABC):
     ACCOUNT_TYPE_SPOT = "spot"
@@ -149,11 +157,15 @@ class CoinexTracker(BaseTracker):
 
     def _format_futures_balance(self, balance: Dict) -> Dict:
         """格式化Coinex的币币账户余额数据"""
+        available = Decimal(str(balance.get('available', '0')))
+        margin = Decimal(str(balance.get('margin', '0')))
+        frozen = Decimal(str(balance.get('frozen', '0')))
+        unrealized_pnl = Decimal(str(balance.get('unrealized_pnl', '0')))
         return {
             'coin': balance['ccy'],
-            'free': Decimal(str(balance.get('available', '0'))),
-            'locked': Decimal(str(balance.get('frozen', '0'))),
-            'total': Decimal(str(balance.get('available', '0'))) + Decimal(str(balance.get('frozen', '0'))),
+            'free': available,
+            'locked': frozen,
+            'total': available + margin + frozen + unrealized_pnl,
             'exchange': self.exchange,
             'type': self.ACCOUNT_TYPE_FUTURES
         }
@@ -209,7 +221,11 @@ class Tracker:
     
     def _init_db_manager(self):
         """初始化数据库管理器"""
-        self.db_manager = DatabaseManager(self.db_config)
+        # mysql or sqlite
+        if self.db_config.get('connector') == 'mysql':
+            self.db_manager = MysqlDbManager(self.db_config)
+        else:
+            self.db_manager = SQLiteDbManager(self.db_config)
 
     def _init_trackers(self, config: List[Dict]):
         """初始化追踪器"""
@@ -251,6 +267,7 @@ class Tracker:
 
             # 计算total_usdt总和
             total_usdt_sum = Decimal('0')
+            detail: Dict[str, Decimal] = {}
 
             tickers: Dict[str, Decimal] = {}
             with self.tickers_lock:
@@ -270,6 +287,10 @@ class Tracker:
                 total_usdt = price_usdt * balance['total']
                 # 累加总USDT价值
                 total_usdt_sum += total_usdt
+                if balance['exchange'] not in detail:
+                    detail[balance['exchange']] = total_usdt
+                else:
+                    detail[balance['exchange']] += total_usdt
                 
                 values.append((
                     self.user_id,
@@ -298,13 +319,14 @@ class Tracker:
             # 插入总资产记录
             total_assets_sql = """
                 INSERT INTO total_assets_history (
-                    user_id, created_at, total_usdt
-                ) VALUES (%s, %s, %s)
+                    user_id, created_at, total_usdt, detail
+                ) VALUES (%s, %s, %s, %s)
             """
             self.db_manager.execute(total_assets_sql, (
                 self.user_id,
                 current_time,
-                str(total_usdt_sum)
+                str(total_usdt_sum),
+                json.dumps(detail, cls=DecimalEncoder)
             ))
                 
             logger.info(f"成功保存 {len(balances) + 1} 条余额记录到数据库")

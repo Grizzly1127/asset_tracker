@@ -327,9 +327,9 @@ class Tracker:
                 ) VALUES 
             """
             if self.db_config.get('connector') == 'mysql':
-                sql = "(%s, %s, %s, %s)"
+                sql += "(%s, %s, %s, %s)"
             else:
-                sql = "(?, ?, ?, ?)"
+                sql += "(?, ?, ?, ?)"
             self.db_manager.execute_many(sql, [(
                 self.user_id,
                 current_time,

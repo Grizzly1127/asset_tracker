@@ -310,24 +310,32 @@ class Tracker:
                 INSERT INTO assets_history (
                     user_id, created_at, coin, exchange, type, 
                     free, locked, total, price_usdt, total_usdt
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ) VALUES 
             """
+            if self.db_config.get('connector') == 'mysql':
+                sql += "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            else:
+                sql += "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             
             # 执行批量插入
             self.db_manager.execute_many(sql, values)
 
             # 插入总资产记录
-            total_assets_sql = """
+            sql = """
                 INSERT INTO total_assets_history (
                     user_id, created_at, total_usdt, detail
                 ) VALUES (%s, %s, %s, %s)
             """
-            self.db_manager.execute(total_assets_sql, (
+            if self.db_config.get('connector') == 'mysql':
+                sql = "(%s, %s, %s, %s)"
+            else:
+                sql = "(?, ?, ?, ?)"
+            self.db_manager.execute_many(sql, [(
                 self.user_id,
                 current_time,
                 str(total_usdt_sum),
                 json.dumps(detail, cls=DecimalEncoder)
-            ))
+            )])
                 
             logger.info(f"成功保存 {len(balances) + 1} 条余额记录到数据库")
             

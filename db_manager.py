@@ -8,7 +8,6 @@ logger = get_logger()
 
 class BaseDbManager(ABC):
     """数据库管理基类"""
-    
     def __init__(self, config: Dict):
         self.config = config
 
@@ -17,19 +16,15 @@ class BaseDbManager(ABC):
         """获取数据库连接"""
         raise NotImplementedError
 
+    @abstractmethod
     def execute(self, sql: str, params: tuple = None):
         """执行单条 SQL 语句"""
-        with self.get_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(sql, params)
-            conn.commit()
+        raise NotImplementedError
 
+    @abstractmethod
     def execute_many(self, sql: str, params_list: List[tuple]):
         """执行批量SQL语句"""
-        with self.get_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.executemany(sql, params_list)
-            conn.commit()
+        raise NotImplementedError
 
     @abstractmethod
     def close(self):
@@ -55,7 +50,7 @@ class MysqlDbManager(BaseDbManager):
         try:
             self.pool = pooling.MySQLConnectionPool(
                 pool_name="mypool",
-                pool_size=5,
+                pool_size=2,
                 **self.config
             )
             logger.info("数据库连接池创建成功")
@@ -70,6 +65,20 @@ class MysqlDbManager(BaseDbManager):
         except Exception as e:
             logger.error(f"获取数据库连接失败: {e}")
             raise
+
+    def execute(self, sql: str, params: tuple = None):
+        """执行单条 SQL 语句"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(sql, params)
+            conn.commit()
+
+    def execute_many(self, sql: str, params_list: List[tuple]):
+        """执行批量SQL语句"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.executemany(sql, params_list)
+            conn.commit()
 
     def _create_asset_history(self):
         """创建必要的数据表"""
@@ -144,12 +153,26 @@ class SQLiteDbManager(BaseDbManager):
     """SQLite 数据库管理类"""
     def __init__(self, config: Dict):
         super().__init__(config)
-        self.connection = sqlite3.connect(self.config['database'])  # 使用
+        self.connection = sqlite3.connect(config['database'], check_same_thread=False)
         self.create_tables()
 
     def get_connection(self):
         """获取数据库连接"""
-        return self.connection  # 返回 SQLite 连接
+        return self.connection
+
+    def execute(self, sql: str, params: tuple = None):
+        """执行单条 SQL 语句"""
+        cursor = self.get_connection().cursor()
+        cursor.execute(sql)
+        self.get_connection().commit()
+        cursor.close()
+
+    def execute_many(self, sql: str, params_list: List[tuple]):
+        """执行批量SQL语句"""
+        cursor = self.get_connection().cursor()
+        cursor.executemany(sql, params_list)
+        self.get_connection().commit()
+        cursor.close()
 
     def create_tables(self):
         """创建必要的数据表"""
@@ -187,7 +210,8 @@ class SQLiteDbManager(BaseDbManager):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             created_at DATETIME NOT NULL,
-            total_usdt REAL NOT NULL
+            total_usdt REAL NOT NULL,
+            detail TEXT NOT NULL
         );
         """
         try:

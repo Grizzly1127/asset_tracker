@@ -324,7 +324,7 @@ class Tracker:
             sql = """
                 INSERT INTO total_assets_history (
                     user_id, created_at, total_usdt, detail
-                ) VALUES (%s, %s, %s, %s)
+                ) VALUES 
             """
             if self.db_config.get('connector') == 'mysql':
                 sql = "(%s, %s, %s, %s)"

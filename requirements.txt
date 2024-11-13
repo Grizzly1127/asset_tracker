@@ -5,6 +5,9 @@ python-json-logger==2.0.7
 binance-connector
 binance-futures-connector
 
+# Okx
+python-okx===0.3.3
+
 # mysql
 mysql-connector-python
 
